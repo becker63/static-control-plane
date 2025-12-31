@@ -6,10 +6,10 @@
 }:
 
 let
-  frpcKclSrc = ./FRPC_Config.k;
+  frpsKclSrc = ./frps.k;
 
-  frpcConfigDrv =
-    pkgs.runCommand "frpc-config"
+  frpsConfigDrv =
+    pkgs.runCommand "frps-config"
       {
         nativeBuildInputs = [ pkgs.kcl ];
       }
@@ -17,11 +17,11 @@ let
         mkdir -p $out
 
         # Render KCL to JSON
-        kcl ${frpcKclSrc} --format json > $out/frpc.json
+        kcl ${frpsKclSrc} --format json > $out/frps.json
       '';
 in
 {
-  networking.hostName = "frpc-node";
+  networking.hostName = "frps-node";
   time.timeZone = "UTC";
 
   environment.systemPackages = [
@@ -29,16 +29,16 @@ in
     pkgs.frp
   ];
 
-  systemd.services.frpc = {
-    description = "FRPC client";
+  systemd.services.frps = {
+    description = "FRPS client";
     wantedBy = [ "multi-user.target" ];
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
 
     serviceConfig = {
       ExecStart = ''
-        ${pkgs.frp}/bin/frpc \
-          -c ${frpcConfigDrv}/frpc.json
+        ${pkgs.frp}/bin/frps \
+          -c ${frpsConfigDrv}/frps.json
       '';
 
       Restart = "always";
